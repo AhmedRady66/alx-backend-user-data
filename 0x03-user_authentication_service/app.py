@@ -2,7 +2,9 @@
 """Flask app"""
 from flask import Flask, jsonify, Response
 
+
 app = Flask(__name__)
+
 
 @app.route("/")
 def homr() -> Response:
