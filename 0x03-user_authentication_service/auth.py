@@ -50,6 +50,16 @@ class Auth:
         except NoResultFound:
             return
 
+    def get_user_from_session_id(self, session_id: str) -> Optional[str]:
+        """Find user by session ID"""
+        try:
+            user = self._db.find_user_by(session_id=session_id)
+            if user:
+                return user
+            return None
+        except Exception:
+            return None
+
 
 def _hash_password(password: str) -> bytes:
     """Return password as bytes"""
