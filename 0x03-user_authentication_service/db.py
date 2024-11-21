@@ -7,7 +7,6 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import InvalidRequestError
-from typing import Dict
 from user import Base, User
 
 
@@ -39,13 +38,14 @@ class DB:
         self._session.commit()
         return user
 
-    def find_user_by(self, **kwargs: Dict[str, str]) -> User:
+    def find_user_by(self, **kwargs) -> User:
         """Find a specific user"""
-        session = self.__session
-        try:
-            user = session.query(User).filter_by(**kwargs).one()
-        except NoResultFound:
-            raise NoResultFound()
-        except InvalidRequestError:
-            raise InvalidRequestError
-        return user
+        for key in kwargs.keys():
+            if not hasattr(User, key):
+                raise InvalidRequestError()
+
+        user = self._session.query(User).filter_by(**kwargs).first()
+
+        if user:
+            return user
+        raise NoResultFound
