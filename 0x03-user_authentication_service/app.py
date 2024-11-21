@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Flask app"""
-from flask import Flask, jsonify, Response, request
+from flask import Flask, jsonify, Response, request, abort, make_response
 from auth import Auth
+from typing import Optional, Tuple
 
 
 app = Flask(__name__)
@@ -29,6 +30,29 @@ def users() -> Response:
             return message
         except Exception:
             return jsonify({"message": "email already registered"}), 400
+
+
+@app.route("/sessions", methods=["POST"])
+def login() -> Optional[Tuple]:
+    """User Login"""
+    try:
+        if request.method == "POST":
+            pure_email = request.form.get("email")
+            email = pure_email.strip()
+            pure_pass = request.form.get("password")
+            password = pure_pass.strip()
+            try:
+                if not AUTH.valid_login(email, password):
+                    abort(401)
+                session_id = AUTH.create_session(email)
+                message = {"email": email, "message": "logged in"}
+                response = make_response(jsonify(message), 200)
+                response.set_cookie("session_id", session_id)
+                return response
+            except ValueError:
+                abort(401)
+    except Exception:
+        abort(401)
 
 
 if __name__ == "__main__":
